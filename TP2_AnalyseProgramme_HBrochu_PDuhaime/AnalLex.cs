@@ -67,6 +67,8 @@ namespace TP2_AnalyseProgramme_HBrochu_PDuhaime
                     }
                         
 
+                    //TODO Ajout des . et , | Distinction des réels et des entiers (Integer ou Reel)
+
                 case "Digit":
                     AddChar();
                     GetChar();
@@ -78,12 +80,6 @@ namespace TP2_AnalyseProgramme_HBrochu_PDuhaime
 
                     return "Number";
 
-
-                case ":":
-                case ";":
-                case "=":
-                case "+":
-                    return Char.ToString();
                 default:
                     return Char.ToString();
             }
@@ -112,10 +108,8 @@ namespace TP2_AnalyseProgramme_HBrochu_PDuhaime
                 Type = "Letter";
             else if (Char >= '0' && Char <= '9')
                 Type = "Digit";
-            else if (Char == '_' || Char == ':' || Char == ';' || Char == '=' || Char == '+')
-                Type = Char.ToString();
             else
-                Type = "Other";
+                Type = Char.ToString();
         }
 
     }

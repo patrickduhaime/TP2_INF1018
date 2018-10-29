@@ -24,6 +24,9 @@ namespace TP2_AnalyseProgramme_HBrochu_PDuhaime
                 return false;
 
             //TODO: Analyseur sémantique (AnalSem)
+            AnalSem analSem = new AnalSem(analSyn.Dictionary, analSyn.Procedure, analSyn.Instructions);
+            if (!analSem.Analyse())
+                return false;
 
             return true;
         }
