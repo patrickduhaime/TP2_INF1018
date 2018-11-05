@@ -89,10 +89,28 @@ namespace TP2_AnalyseProgramme_HBrochu_PDuhaime
                     break;
             }
 
+            //TODO: Vérification de la validité des opérations mathématiques
+
+            if (!instruction[0].StartsWith("ID"))
+                return false;
+
             if (instruction[1] != "=")
                 return false;
 
-            //TODO: Vérification de la validité des opérations mathématiques
+            if (instruction[2] != "Number")
+                return false;
+
+            if (instruction[instruction.Count-1] != "Number")
+                return false;
+
+            for (int i = 4; i < instruction.Count; i+=2)
+            {
+                if (instruction[i] != "Number")
+                    return false;
+                if (instruction[i - 1] != "+" && instruction[i - 1] != "-" && instruction[i - 1] != "*" && instruction[i - 1] != "/")
+                    return false;
+            }
+
 
             Instructions.Add(instruction);
 
