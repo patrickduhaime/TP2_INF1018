@@ -12,9 +12,9 @@ namespace TP2_AnalyseProgramme_HBrochu_PDuhaime
     class AnalSyn
     {
         private List<string> lexemes;
-        public Dictionary<string, string> Dictionary { get; }
-        public List<string> Procedure { get; }
-        public List<List<string>> Instructions { get; }
+        public Dictionary<string, string> Dictionary { get; } = new Dictionary<string, string>();
+        public List<string> Procedure { get; } = new List<string>();
+        public List<List<string>> Instructions { get; } = new List<List<string>>();
 
         public AnalSyn(List<string> lexemes) => this.lexemes = lexemes;
 
@@ -70,7 +70,7 @@ namespace TP2_AnalyseProgramme_HBrochu_PDuhaime
                 declaration[4] != ";")
                 return false;
 
-            Dictionary.Add(declaration[0],declaration[3]);
+            Dictionary.Add(declaration[1],declaration[3]);
 
             for (int i = 0; i < declaration.Count; i++)
                 lexemes.RemoveAt(0);

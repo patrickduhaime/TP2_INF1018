@@ -26,11 +26,9 @@ namespace TP2_AnalyseProgramme_HBrochu_PDuhaime
             //Vérifie si les deux identificateurs de la procédure sont les mêmes.
             if (procedure[1] != procedure.Last())
                 return false;
-            
 
             foreach (List<string> instruction in instructions)
             {
-
                 //Vérifie si toutes les variables des instructions sont déclarées.
                 foreach (string lexeme in instruction)
                     if (lexeme.StartsWith("ID") && !dictionary.ContainsKey(lexeme))
@@ -39,7 +37,7 @@ namespace TP2_AnalyseProgramme_HBrochu_PDuhaime
                 //Si le résultat attendu n'est pas un integer, passe à l'instruction suivante.
                 if (dictionary[instruction[0]] != "Integer")
                     continue;
-
+                
                 //Vérification s'il y a affectation d'une valeur réelle à un identificateur entier.
                 foreach (string lexeme in instruction.Skip(1))
                 {
@@ -53,7 +51,6 @@ namespace TP2_AnalyseProgramme_HBrochu_PDuhaime
                     if (lexeme == "Reel")
                         return false;
                 }
-
             }
 
             return true;
