@@ -1,129 +1,181 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace TP2_AnalyseProgramme_HBrochu_PDuhaime
 {
-    //Classe qui analyse les unités lexicales et vérifie que la structure du code est valide.
-
-    //TODO: Vérification de la validité des opérations mathématiques (ligne 83)
+    //Classe qui analyse la syntaxe du code.
     class AnalSyn
     {
-        private List<string> lexemes;
-        public Dictionary<string, string> Dictionary { get; } = new Dictionary<string, string>();
-        public List<string> Procedure { get; } = new List<string>();
-        public List<List<string>> Instructions { get; } = new List<List<string>>();
+        private AnalLex analLex;
+        private AnalSem analSem = new AnalSem();
 
-        public AnalSyn(List<string> lexemes) => this.lexemes = lexemes;
+        public AnalSyn(AnalLex analLex) => this.analLex = analLex;
 
-        public bool Analyse()
+        private string Next() => analLex.GetLexeme();
+
+        public bool Analyse() => Procedure();
+
+        //Analyse de la procédure
+        private bool Procedure()
         {
-            if (!AnalyseProcedure())
-                return methodeErreur(1);
+            if (Next() != "Procedure")
+                return Erreur(1);
 
-            while (lexemes[0] == "declare")
-                if (!AnalyseDeclarations())
-                    return methodeErreur(2);
+            string firstId = Next();
+            if (!firstId.StartsWith("ID"))
+                return Erreur(1);
 
-            while (lexemes.Count != 0)
-                if (!AnalyseInstructions())
-                    return false;
-
-            return true;
-        }
-
-        private bool AnalyseProcedure()
-        {
-            if (lexemes[0] != "Procedure" || !lexemes[1].StartsWith("ID") || lexemes[lexemes.Count - 2] != "Fin_Procedure" 
-                || !lexemes[lexemes.Count - 1].StartsWith("ID"))
-                 return false;
-
-            Procedure.Add(lexemes[0]);
-            Procedure.Add(lexemes[1]);
-            Procedure.Add(lexemes[lexemes.Count - 2]);
-            Procedure.Add(lexemes[lexemes.Count - 1]);
-
-            lexemes.RemoveAt(0);
-            lexemes.RemoveAt(0);
-            lexemes.RemoveAt(lexemes.Count - 1);
-            lexemes.RemoveAt(lexemes.Count - 1);
-            return true;
-
-        }
-
-        private bool AnalyseDeclarations()
-        {
-            List<string> declaration = new List<string>();
-            int index = 0;
-            while (true)
-            {
-                declaration.Add(lexemes[index++]);
-                if (declaration.Last() == ";")
-                    break;
-            }
-
-            if (declaration.Count != 5 || declaration[0] != "declare" ||
-                !declaration[1].StartsWith("ID") || declaration[2] != ":" ||
-                (declaration[3] != "entier" && declaration[3] != "reel") ||
-                declaration[4] != ";")
+            //Analyse des déclarations et des instructions
+            if (!Declarations() || !Instructions())
                 return false;
 
-            Dictionary.Add(declaration[1],declaration[3]);
+            if (Next() != "Fin_Procedure") 
+                return Erreur(1);
 
-            for (int i = 0; i < declaration.Count; i++)
-                lexemes.RemoveAt(0);
+            string secondId = Next();
+            if (!secondId.StartsWith("ID"))
+                return Erreur(1);
+
+            //Appel de l'analyse sémantique.
+            return analSem.SameIdProcedure(firstId, secondId);
+        }
+
+        //Analyse des déclarations.
+        private bool Declarations()
+        {
+            //Tant que le prochain lexeme est "declare", on détermine qu'il reste une déclaration et on l'analyse.
+            while (Next() == "declare")
+                if (!Declaration())
+                    return false;
+
+            analLex.PutBackLexeme();
+            return true;
+        }
+
+        //Analyse d'une déclaration.
+        private bool Declaration()
+        {
+            string id = Next();
+            if (!id.StartsWith("ID") || Next() != ":")
+                return Erreur(2);
+
+            string type = Next();
+            if ((type != "entier" && type != "reel") || Next() != ";")
+                return Erreur(2);
+
+            //On ajoute la valeur déclarée à un dictionnaire de l'analyseur sémantique.
+            analSem.DeclareId(id, type);
 
             return true;
         }
 
-        private bool AnalyseInstructions()
+        //Analyse des instructions.
+        private bool Instructions()
         {
-            List<string> instruction = new List<string>();
-            int index = 0;
-            while (true)
+            if (!Instruction())
+                return false;
+
+            //Tant que le prochain lexeme est ";", on détermine qu'il reste une instruction et on l'analyse.
+            string endIns = Next();
+            while (endIns == ";")
             {
-                instruction.Add(lexemes[index++]);
-                if (instruction.Last() == ";" || index == lexemes.Count)
-                    break;
+                if (!Instruction())
+                    return false;
+                endIns = Next();
             }
 
-            //TODO: Vérification de la validité des opérations mathématiques
-
-            if (!instruction[0].StartsWith("ID"))
-                return methodeErreur(3);
-
-            if (instruction[1] != "=")
-                return methodeErreur(4);
-
-            if (instruction[2] != "Number")
-                return methodeErreur(5);
-
-            if (instruction[instruction.Count-1] != "Number")
-                return methodeErreur(6);
-
-            for (int i = 4; i < instruction.Count; i+=2)
-            {
-                if (instruction[i] != "Number")
-                    return methodeErreur(7);
-                if (instruction[i - 1] != "+" && instruction[i - 1] != "-" && instruction[i - 1] != "*" && instruction[i - 1] != "/")
-                    return methodeErreur(8);
-            }
-
-            Instructions.Add(instruction);
-
-            for (int i = 0; i < instruction.Count; i++)
-                lexemes.RemoveAt(0);
-
-            return true;  
+            analLex.PutBackLexeme();
+            return true;
         }
-        
 
-        private bool methodeErreur(int code)
+        //Analyse d'une instruction.
+        private bool Instruction()
         {
-            ///////Traitement de l’erreur
+            string leftElement = Next();
+            if (!leftElement.StartsWith("ID"))
+                return Erreur(3);
 
+            //Analyse sémantique : On vérifie que l'ID est déclaré.
+            if (!analSem.IdIsDeclared(leftElement))
+                return false;
+
+            //Analyse sémantique : On déclare si le résultat de l'instruction attend un réel ou un entier.
+            analSem.SetLeftElementType(leftElement);
+
+            if (Next() != "=")
+                return Erreur(4);
+
+            return Expression();
+        }
+
+        //Analyse d'une expression.
+        private bool Expression()
+        {
+            if (!Terme())
+                return false;
+            string operateur = Next();
+            while(operateur == "+" || operateur == "-")
+            {
+                if (!Terme())
+                    return false;
+                operateur = Next();
+            }
+            analLex.PutBackLexeme();
+            return true;
+        }
+
+        //Analyse d'un terme.
+        private bool Terme()
+        {
+            if (!Facteur())
+                return false;
+            string operateur = Next();
+            while (operateur == "*" || operateur == "/")
+            {
+                //Analyse sémantique : Si l'opérateur est "/", on vérifie que le résultat attend un réel.
+                if (operateur == "/" && !analSem.LeftElementIsReel())
+                    return false;
+
+                if (!Facteur())
+                    return false;
+                operateur = Next();
+            }
+            analLex.PutBackLexeme();
+            return true;
+        }
+
+        //Analuse d'un facteur.
+        private bool Facteur()
+        {
+            string facteur = Next();
+            if (facteur == "(")
+            {
+                if (!Expression())
+                    return false;
+                if (Next() != ")")
+                    return Erreur(6);
+            }
+            else if (!facteur.StartsWith("ID") && !facteur.StartsWith("entier") && !facteur.StartsWith("reel"))
+                return Erreur(5);
+
+            //Analyse sémantique : Vérifie que l'ID est déclaré et que l'ID n'est pas un réel si le résultat attendu est un entier.
+            if (facteur.StartsWith("ID") && (!analSem.IdIsDeclared(facteur) || !analSem.IdHasValidType(facteur)))
+                return false;
+
+            //Analyse sémantique : Vérifie que le nombre n'est pas un réel si le résultat attendu est un entier.
+            if (facteur.StartsWith("entier") && !analSem.NumberHasValidType(facteur))
+                return false;
+
+            return true;
+        }
+
+        //Traitement de l’erreur
+        private bool Erreur(int code)
+        {
             switch (code)
             {
                 case 1:
@@ -139,22 +191,15 @@ namespace TP2_AnalyseProgramme_HBrochu_PDuhaime
                     Console.WriteLine("Une instruction doit avoir un signe '=' apres l'identificateur ! Analyse syntaxique Erreur 04");
                     break;
                 case 5:
-                    Console.WriteLine("Une instruction doit avoir un nombre apres le signe '=' ! Analyse syntaxique Erreur 05");
+                    Console.WriteLine("Une expression est invalide. Analyse syntaxique Erreur 05");
                     break;
                 case 6:
-                    Console.WriteLine("Une instruction doit se terminer par un nombre ! Analyse syntaxique Erreur 06");
-                    break;
-                case 7:
-                    Console.WriteLine("Une instruction doit contenir des nombres seulement ! Analyse syntaxique Erreur 07");
-                    break;
-                case 8:
-                    Console.WriteLine("Une instruction doit contenir les operateurs mathematiques + - * ou / seulement ! Analyse syntaxique Erreur 08");
+                    Console.WriteLine("Une parenthèse est ouverte mais n'est pas fermée convenablement ! Analyse syntaxique Erreur 06");
                     break;
                 default:
                     Console.WriteLine("Analyse syntaxique Erreur");
                     break;
             }
-
             return false;
         }
     }

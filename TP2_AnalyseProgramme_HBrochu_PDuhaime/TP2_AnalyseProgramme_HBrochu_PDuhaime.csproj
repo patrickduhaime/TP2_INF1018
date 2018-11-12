@@ -46,7 +46,6 @@
     <Compile Include="AnalLex.cs" />
     <Compile Include="AnalSem.cs" />
     <Compile Include="AnalSyn.cs" />
-    <Compile Include="Analyseur.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

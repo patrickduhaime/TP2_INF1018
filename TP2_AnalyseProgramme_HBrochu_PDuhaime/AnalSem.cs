@@ -6,54 +6,53 @@ using System.Threading.Tasks;
 
 namespace TP2_AnalyseProgramme_HBrochu_PDuhaime
 {
+    //Classe qui analyse la sémantique du code.
     class AnalSem
     {
-        private Dictionary<string, string> dictionary;
-        private List<string> procedure;
-        private List<List<string>> instructions;
+        private Dictionary<string, string> dictionary = new Dictionary<string, string>();
+        private string leftElementType = "";
 
-        public AnalSem(Dictionary<string, string> dictionary, List<string> procedure, List<List<string>> instructions)
+        public AnalSem() { }
+
+       
+        public void DeclareId(string id, string type) => dictionary.Add(id, type);
+
+        public void SetLeftElementType(string leftElement) => leftElementType = dictionary[leftElement];
+
+        //Vérifie si les deux identificateurs de la procédure sont les mêmes.
+        public bool SameIdProcedure(string firstId, string secondId) => (firstId == secondId) ? true : Erreur(1);
+
+        //Vérifie si un identificateur a été déclaré.
+        public bool IdIsDeclared(string id) => dictionary.ContainsKey(id) ? true : Erreur(2);
+
+        //Vérifie qu'un id d'une expression n'est pas un réel si l'élément de gauche est un entier
+        public bool IdHasValidType(string rightElement) => (leftElementType == "reel" || dictionary[rightElement] == "entier") ? true : Erreur(3);
+
+        //Vérifie qu'un numbre d'une expression n'est pas un réel si l'élément de gauche est un entier
+        public bool NumberHasValidType(string number) => (leftElementType == "reel" || number == "entier") ? true : Erreur(3);
+
+        //Vérifie que l'élément de gauche n'est pas un entier (utilisé lorsqu'il y a une division dans l'expression).
+        public bool LeftElementIsReel() => leftElementType == "reel" ? true : Erreur(3);
+
+        //Traitement de l’erreur
+        private bool Erreur(int code)
         {
-            this.dictionary = dictionary;
-            this.procedure = procedure;
-            this.instructions = instructions;
-
-            //Erreur.callErreur("113");
-        }
-
-        public bool Analyse()
-        {
-            //Vérifie si les deux identificateurs de la procédure sont les mêmes.
-            if (procedure[1] != procedure.Last())
-                return false;
-
-            foreach (List<string> instruction in instructions)
+            switch (code)
             {
-                //Vérifie si toutes les variables des instructions sont déclarées.
-                foreach (string lexeme in instruction)
-                    if (lexeme.StartsWith("ID") && !dictionary.ContainsKey(lexeme))
-                        return false;
-
-                //Si le résultat attendu n'est pas un integer, passe à l'instruction suivante.
-                if (dictionary[instruction[0]] != "Integer")
-                    continue;
-                
-                //Vérification s'il y a affectation d'une valeur réelle à un identificateur entier.
-                foreach (string lexeme in instruction.Skip(1))
-                {
-                    //Erreur si l'instruction contient une division.
-                    if (lexeme.StartsWith("/"))
-                        return false;
-                    //Erreur si le lexeme est une variable réelle.
-                    if (lexeme.StartsWith("ID") && dictionary[lexeme] == "Reel")
-                        return false;
-                    //Erreur si le lexeme est un nombre réel.
-                    if (lexeme == "Reel")
-                        return false;
-                }
+                case 1:
+                    Console.WriteLine(" Les deux identificateurs d’une procédure doivent être identiques ! Analyse sémantique Erreur 01");
+                    break;
+                case 2:
+                    Console.WriteLine(" Toute variable utilisée dans une expression doit être préalablement déclarée ! Analyse sémantique Erreur 02");
+                    break;
+                case 3:
+                    Console.WriteLine(" On ne peut pas affecter le résultat d’une expression réelle (type reel) à une variable de type entier ! Analyse sémantique Erreur 03");
+                    break;
+                default:
+                    Console.WriteLine("Analyse sémantique Erreur");
+                    break;
             }
-
-            return true;
+            return false;
         }
     }
 }

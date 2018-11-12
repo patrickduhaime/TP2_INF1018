@@ -9,8 +9,8 @@ namespace TP2_AnalyseProgramme_HBrochu_PDuhaime
     class Program
     {
         static void Main(string[] args)
-        
         {
+            //Lecture du fichier situé dans le bin/Debug
             string file_name = "file.txt";
             string textLine = "";
 
@@ -31,14 +31,10 @@ namespace TP2_AnalyseProgramme_HBrochu_PDuhaime
                 
             }
 
-            Analyseur analyseur = new Analyseur(textLine);
-            Console.WriteLine(analyseur.Analyse());
+            //Lance l'analyse du code
+            Console.WriteLine(new AnalSyn(new AnalLex(textLine)).Analyse());
             Console.ReadLine();
 
-
         }
-
-
-
     }
 }
