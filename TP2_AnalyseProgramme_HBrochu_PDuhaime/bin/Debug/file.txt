@@ -1,6 +1,0 @@
-Procedure id1 
-declare id2 : entier ; 
-declare id3 : reel ; 
-id2 = (3 + 2) * 3 ; 
-id3 = id2 / (4 - 5) 
-Fin_Procedure id1

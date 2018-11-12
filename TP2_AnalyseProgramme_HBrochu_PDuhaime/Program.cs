@@ -11,7 +11,7 @@ namespace TP2_AnalyseProgramme_HBrochu_PDuhaime
         static void Main(string[] args)
         {
             //Lecture du fichier situé dans le bin/Debug
-            string file_name = "file.txt";
+            string file_name = "../../../file.txt";
             string textLine = "";
 
             if(System.IO.File.Exists(file_name) == true)
