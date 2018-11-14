@@ -10,7 +10,7 @@ namespace TP2_AnalyseProgramme_HBrochu_PDuhaime
     {
         static void Main(string[] args)
         {
-            //Lecture du fichier situé dans le bin/Debug
+            //Lecture du fichier 
             string file_name = "../../../file.txt";
             string textLine = "";
 

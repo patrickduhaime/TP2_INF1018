@@ -17,6 +17,8 @@ namespace TP2_AnalyseProgramme_HBrochu_PDuhaime
 
         public void PutBackLexeme() => Code = Lexeme + " " + Code;
 
+        public List<string> GetList() => listIDs;
+
         //Isole et retourne le prochain lexeme du code.
         public string GetLexeme()
         {

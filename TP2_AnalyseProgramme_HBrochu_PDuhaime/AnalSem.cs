@@ -25,6 +25,9 @@ namespace TP2_AnalyseProgramme_HBrochu_PDuhaime
         //Vérifie si un identificateur a été déclaré.
         public bool IdIsDeclared(string id) => dictionary.ContainsKey(id) ? true : Erreur(2);
 
+        //Vérifie si un identificateur ne fait pas plus de 8 caractères.
+        public bool IdIsNotOverEigth(string id) => id.Length < 9 ? true : Erreur(99); 
+
         //Vérifie qu'un id d'une expression n'est pas un réel si l'élément de gauche est un entier
         public bool IdHasValidType(string rightElement) => (leftElementType == "reel" || dictionary[rightElement] == "entier") ? true : Erreur(3);
 

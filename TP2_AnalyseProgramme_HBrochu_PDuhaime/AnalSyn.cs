@@ -29,6 +29,10 @@ namespace TP2_AnalyseProgramme_HBrochu_PDuhaime
             if (!firstId.StartsWith("ID"))
                 return Erreur(1);
 
+            ///////////////////////////////////////////////
+            if (!analSem.IdIsNotOverEigth(analLex.GetList()[(int)Char.GetNumericValue(firstId[2])]))
+                return false;
+
             //Analyse des déclarations et des instructions
             if (!Declarations() || !Instructions())
                 return false;
@@ -148,7 +152,7 @@ namespace TP2_AnalyseProgramme_HBrochu_PDuhaime
             return true;
         }
 
-        //Analuse d'un facteur.
+        //Analyse d'un facteur.
         private bool Facteur()
         {
             string facteur = Next();
@@ -164,6 +168,9 @@ namespace TP2_AnalyseProgramme_HBrochu_PDuhaime
 
             //Analyse sémantique : Vérifie que l'ID est déclaré et que l'ID n'est pas un réel si le résultat attendu est un entier.
             if (facteur.StartsWith("ID") && (!analSem.IdIsDeclared(facteur) || !analSem.IdHasValidType(facteur)))
+                return false;
+
+            if (facteur.StartsWith("ID") && !analSem.IdIsNotOverEigth(analLex.GetList()[(int)Char.GetNumericValue(facteur[2])]))
                 return false;
 
             //Analyse sémantique : Vérifie que le nombre n'est pas un réel si le résultat attendu est un entier.
